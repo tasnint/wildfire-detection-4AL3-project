@@ -4,7 +4,7 @@ import pandas as pd
 from PIL import Image
 
 """
-PLEASE FILL IN THE FILE DIRECTORIES BEFORE RUNNING THIS CODE WITH THE APPROPRIATE IMAGES
+PLEASE FILL IN THE FILE DIRECTORIES BEFORE RUNNING THIS CODE WITH THE APPROPRIATE IMAGES and file structure
 """
 # Data Sets
 classification_sets = ["training_set/", "validation_set/", "testing_set/"]

@@ -7,9 +7,6 @@
 *.bbl
 *.aux
 *.toc
-# \training_set
-# \validation_set
-# \testing_set
 *.jpeg
 *.jpg
 *.png
