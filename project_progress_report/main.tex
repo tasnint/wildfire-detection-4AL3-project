@@ -54,6 +54,13 @@
 
 Here, write a brief introduction to the problem you are solving. This can be adapted from your problem description and motivation from the original proposal. This should be around 0.25-0.5 pages.
 
+Wildfires are becoming increasingly prevalent and devastating due to climate change [https://science.nasa.gov/earth/explore/wildfires-and-climate-change/]. 
+This poses a growing threat to both human safety and the environment, causing billions of dollars in damages each year and severely affecting air quality and biodiversity [https://www.canada.ca/en/services/health/healthy-living/environment/air-quality/wildfire-smoke/human-health-effects-report-summary.html], [https://www.sciencedirect.com/science/article/pii/S2211464525002283], [https://www.nbcnews.com/science/climate-change/billion-dollar-disasters-economic-toll-wildfires-severe-storms-earthqu-rcna221473].  
+Early detection of wildfires is crucial for effective response and mitigation efforts. However, detecting wildfires at an early stage can be challenging.
+Subtle indicators such as light smoke or small flames can be obscured by dense vegetation, clouds, or varying terrain, often making traditional monitoring methods unreliable [https://www.mdpi.com/2078-2489/15/9/538], [https://www.mdpi.com/2571-6255/8/9/356].
+In an attempt to address this issue, our project explores the use of Convolutional Neural Networks (CNNs) for automatic wildfire detection from images [https://www.sciencedirect.com/science/article/pii/S2352484723010041], [https://www.mdpi.com/2072-4292/15/19/4855].
+Our project formulates the task as a binary classification problem: given an RGB image of an area, the model identifies it as a “fire” or “no fire” scenario [https://www.kaggle.com/datasets/elmadafri/the-wildfire-dataset?resource=download].
+
 \section{Related Work}
 
 Here, talk about the related work you encountered for your approach. Cite at least 5 references. Refer to item 2. No one has done exactly your task? Write about the most similar thing you can find. This should be around 0.25-0.5 pages.
@@ -65,6 +72,8 @@ You should write about your dataset here, following the guidelines regarding ite
 \section{Features}
 
 Describe any features you used for your model, or how your data was input to your model. Are you doing feature engineering or feature selection? Are you learning embeddings? Is it all part of one neural network? Refer to item 2. This may range from 0.25 pages to 0.5 pages.
+
+Since convolutional neural networks (CNNs) learn features automatically, our “feature engineering” focuses on transformations that enhance spatial learning rather than on hand-crafted variables.
 
 \section{Implementation}
 
