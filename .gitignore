@@ -7,6 +7,13 @@
 *.bbl
 *.aux
 *.toc
-*.jpeg
-*.jpg
-*.png
+
+# Ignore dataset images
+data/**/*.jpg
+data/**/*.jpeg
+data/**/*.png
+
+# Ignore dataset folders
+data/training_set/
+data/testing_set/
+data/validation_set/
