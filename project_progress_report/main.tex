@@ -54,17 +54,27 @@
 
 Here, write a brief introduction to the problem you are solving. This can be adapted from your problem description and motivation from the original proposal. This should be around 0.25-0.5 pages.
 
-Wildfires are becoming increasingly prevalent and devastating due to climate change [https://science.nasa.gov/earth/explore/wildfires-and-climate-change/]. 
-This poses a growing threat to both human safety and the environment, causing billions of dollars in damages each year and severely affecting air quality and biodiversity [https://www.canada.ca/en/services/health/healthy-living/environment/air-quality/wildfire-smoke/human-health-effects-report-summary.html], [https://www.sciencedirect.com/science/article/pii/S2211464525002283], [https://www.nbcnews.com/science/climate-change/billion-dollar-disasters-economic-toll-wildfires-severe-storms-earthqu-rcna221473].  
+Wildfires are becoming increasingly prevalent and devastating due to climate change []. 
+This poses a growing threat to both human safety and the environment, causing billions of dollars in damages each year and severely affecting air quality and biodiversity [], [], [].  
 Early detection of wildfires is crucial for effective response and mitigation efforts. However, detecting wildfires at an early stage can be challenging.
-Subtle indicators such as light smoke or small flames can be obscured by dense vegetation, clouds, or varying terrain, often making traditional monitoring methods unreliable [https://www.mdpi.com/2078-2489/15/9/538], [https://www.mdpi.com/2571-6255/8/9/356].
-In an attempt to address this issue, our project explores the use of Convolutional Neural Networks (CNNs) for automatic wildfire detection from images [https://www.sciencedirect.com/science/article/pii/S2352484723010041], [https://www.mdpi.com/2072-4292/15/19/4855].
-Our project formulates the task as a binary classification problem: given an RGB image of an area, the model identifies it as a “fire” or “no fire” scenario [https://www.kaggle.com/datasets/elmadafri/the-wildfire-dataset?resource=download].
+Subtle indicators such as light smoke or small flames can be obscured by dense vegetation, clouds, or varying terrain, often making traditional monitoring methods unreliable [], [].
+In an attempt to address this issue, our project explores the use of Convolutional Neural Networks (CNNs) for automatic wildfire detection from images [], [].
+Our project formulates the task as a binary classification problem: given an RGB image of an area, the model identifies it as a “fire” or “no fire” scenario [].
 
 \section{Related Work}
 
 Here, talk about the related work you encountered for your approach. Cite at least 5 references. Refer to item 2. No one has done exactly your task? Write about the most similar thing you can find. This should be around 0.25-0.5 pages.
 
+Advancements in wildfire research have led to the use of deep learning to enhance prediction, monitoring, and detection capabilities []. 
+There are several existing solutions that use a combination of various CNN architectures and other neural networks for wildfire prediction. 
+Popular models include \textbf{FirePred} and \textbf{WFNet}. 
+\textit{FirePred} is a hybrid multi-temporal CNN model for wildfire spread prediction and \textit{WFNet} is a hierarchicalCNN for wildfire spread prediction [], []. 
+However these models, like most renowned ones, focus on modeling wildfire spread and spatiotemporal dynamics rather than direct detection from visual data which our project addresses. 
+For direct wildfire detection from images, the paper \textbf{Advanced Wildfire Detection Using Deep Learning Algorithms: A Comparative Study of CNN Variants} is a notable example []. 
+This study evaluates models such as InceptionV3, Xception, and NASNetMobile on over 25,000 images, achieving accuracies above 98\%. 
+While this study focuses on benchmarking CNN architectures for accuracy, our project differs by optimizing image preprocessing and augmentation pipelines to balance accuracy with computational efficiency for real-time detection. 
+There are however other CNN projects such as Malaria Detection using TensorFlow's malaria dataset that resemble our project's workflow more closely [], []. 
+Similar to our approach, they emphasize image preprocessing, model training, and performance optimization for efficient binary classification.
 \section{Dataset}
 
 You should write about your dataset here, following the guidelines regarding item 1. This section may be 0.5-1 pages. Depending on your specific dataset, you may want to include subsections for the preprocessing, annotation, etc.
