@@ -32,14 +32,19 @@ def build_cnn(input_shape):
 def run_preprocessing_experiments(base_dir, pixel_sizes=None, augmentations=None, epochs=5):
     """Runs experiments over multiple resolutions and augmentation sets."""
     if pixel_sizes is None:
-        pixel_sizes = [(128,128), (224,224), (299,299), (1000,1000)]
+        # pixel_sizes = [(128,128), (224,224), (299,299), (1000,1000)]
+        pixel_sizes = [(128,128)]
 
     if augmentations is None:
+        # augmentations = [
+        #     {"rotation_range":15, "width_shift_range":0.1, "height_shift_range":0.1,
+        #      "zoom_range":0.1, "horizontal_flip":True, "brightness_range":[0.8,1.2]},  # Standard
+        #     {"rotation_range":30, "zoom_range":0.2, "horizontal_flip":True},            # Stronger
+        #     {"rotation_range":0, "zoom_range":0, "horizontal_flip":False},              # Minimal
+        # ]
         augmentations = [
             {"rotation_range":15, "width_shift_range":0.1, "height_shift_range":0.1,
              "zoom_range":0.1, "horizontal_flip":True, "brightness_range":[0.8,1.2]},  # Standard
-            {"rotation_range":30, "zoom_range":0.2, "horizontal_flip":True},            # Stronger
-            {"rotation_range":0, "zoom_range":0, "horizontal_flip":False},              # Minimal
         ]
 
     results = []
