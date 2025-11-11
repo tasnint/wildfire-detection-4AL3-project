@@ -1,2 +1,19 @@
-Our model is a feedforward classification model. It is composed of TODO Conv2D layers of size TODO with ReLu activation, followed by a Dense layer with TODO units. The model has TODO parameters in total, taking up about TODO MB in total.
-Before training, we optimized various parameters empirically. We set out certain augmentations and resolutions to be tested, then trained a model on every dimension of this space via nested for loops that can be found in our code. This process is further outlined in the Features section. The size of layers and the number of layers were determined by manual empirical testing.
+Our implementation is a feedforward classification model. 
+It is composed of TODO Conv2D layers of size TODO with ReLu activation, followed by a Dense layer with TODO units, and . 
+The model has TODO parameters in total, taking up about TODO MB in total.
+Before training, we optimized various parameters empirically. 
+We set out certain augmentations and resolutions to be tested, 
+then trained a model on every dimension of this space via nested for loops that can be found in our code. 
+This process is further outlined in the Features section. 
+The size of layers and the number of layers were determined by manual empirical testing.
+
+To find the most optimized configuration for the classification model, the program checks for differnet resolution and augmentations combinations for the best performance.
+The program performs short epoch intervals session (around 5) on the training data for each combination to identify which combination outputs the best validation accuracy. 
+
+The program utilizies a binary cross entropy as a loss function. This is good for binary classification
+,because it integrates nicely with the sigmoid activation function that outputs 0-1 probabililty values and
+penalizes confident predictions. It also provides a smooth gradient for backprogration and learning \cite{ref14_Arize2023BinaryCrossEntropy}.
+
+Preliminary issues occured when implementing the code firsthand such as extremely long preprocessing times, and code the running indefinitely.
+The long prepocessing was fixed by increase batch sizes and simplifying the model. The infinite long run times was caused by a bug from earlier Tensflow version, 
+so the code was updated accordingly.         
