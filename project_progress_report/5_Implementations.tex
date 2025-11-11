@@ -8,7 +8,7 @@ This process is further outlined in the Features section.
 The size of layers and the number of layers were determined by manual empirical testing.
 
 To find the most optimized configuration for the classification model, the program checks for differnet resolution and augmentations combinations for the best performance.
-The program performs short epoch intervals session (around 5) on the training data for each combination to identify which combination outputs the best validation accuracy. 
+The program performs short epoch intervals session on the training data for each combination to identify which combination outputs the best validation accuracy. 
 
 The program utilizies a binary cross entropy as a loss function. This is good for binary classification
 ,because it integrates nicely with the sigmoid activation function that outputs 0-1 probabililty values and
