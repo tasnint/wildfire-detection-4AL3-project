@@ -1,1 +1,8 @@
-Since convolutional neural networks (CNNs) learn features automatically, our “feature engineering” focuses on transformations that enhance spatial learning rather than on hand-crafted variables.
+The feature set for our model comprises of the pixel values from the images themselves. 
+The images are mainly RGB type images meaning they compose of three colour channels red, green, and blue. 
+The resolution also dictates the number of pixels within a given image. 
+For example, a 128x128 resolution image means there are 128 * 128 * 3 = 49152 feature values that corresponde to
+the RGB colour values. The higher the resolution more features there are and vice versa. 
+During preprocesssing, the images are compressed to a fixed resolution (128x128, 224x224, etc...),
+ so that the input array remains the same. The pixel values are placed in 3D-dimensional matrix.
+This form of feature engineering alows for spacial recognition and patten extraction on a 3D space.                  
