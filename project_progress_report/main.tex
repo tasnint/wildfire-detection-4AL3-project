@@ -56,21 +56,7 @@ Before training, we optimized various parameters empirically. We set out certain
 
 % Write about your plans for the remainder of the project. This should include a discussion of the feedback you received from your TA, and how you plan to improve your approach. Reflect on your implementation and areas for improvement. Refer to item 6. This may be around 0.5 pages.
 \section{Feedback and Plans}
-The primary feedback focused on improving the reproducibility and interpretability of the results. 
-Specifically, the TA recommended implementing a more consistent validation split across all preprocessing configurations to ensure that performance differences are not influenced by random sampling. 
-Additionally, they advised that the baseline model should be clearly defined and quantitatively compared against augmented configurations to emphasize the measurable impact of each experimental change.
-Another key piece of feedback was to include computational metrics—such as average training time per epoch and resource utilization—in the results table. 
-This would clearly demonstrate trade-offs between model accuracy and computational efficiency, which is key to optimizing performance under limited resources.
-The TA also suggested monitoring for potential overfitting by tracking training and validation accuracy curves more closely and introducing early stopping or dropout adjustments if the validation loss diverges.
-
-For the remainder of the project, we plan to incorporate these recommendations by (1) locking a fixed random seed for reproducibility, (2) ensuring the dataset splits are stratified, (3) expanding the evaluation metrics to include F1-score and confusion matrices for a more detailed performance assessment, and (4) introducing a systematic summary table comparing all tested resolutions and augmentation levels.
-We will also document the data preprocessing pipeline in greater detail to improve transparency and ensure that results are easily replicable. 
-Finally, once the best-performing configuration is identified, we will retrain the model for additional epochs and evaluate it on a held-out test set to provide final quantitative results and visualizations.
-
-
-
-
-
+\input{7_Feedback_and_Plans.tex}
 % *****************************************************************************************
 % OPTIONAL SECTION 8: TEMPLATE NOTES, REFERENCES, TABLES AND FIGURES, EQUATIONS
 % \input{8_Template_Notes}
