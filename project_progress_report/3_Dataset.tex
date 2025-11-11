@@ -1,0 +1,5 @@
+We are training our model with the splits gathered from Kaggle. We have 1887 data points for training, 402 for validation, and 410 for test. This roughly corresponds to a 70-15-15 split of our dataset.
+
+The dataset is composed of images mainly depicting forests, fields, and rural areas. Images are sorted into two categories; ``fire'' and ``nofire''. These categories constitute the labels we use during training.
+
+The images are of different resolutions and quality. Some images are considerably higher resolution than others, and it is apparent that the images are from different time periods and were taken by different devices. This presents a minor challenge in training our model, where we need to ensure our model can use each and every one of these data points. We tacke this by normalizing our data as outlined in the Features section.
