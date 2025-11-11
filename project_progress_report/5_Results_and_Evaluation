@@ -1,0 +1,12 @@
+Our model evaluation process focuses on comparing different image preprocessing and augmentation configurations to identify the combination that offers the best trade-off between computational efficiency and classification accuracy.
+The array of pixel sizes we are testing includes: pixel_sizes = [(128,128), (224,224), (299,299), (1000,1000)]. The augmentation configurations are defined as: augmentations = [{"rotation_range":15, "width_shift_range":0.1, "height_shift_range":0.1, "zoom_range":0.1, "horizontal_flip":True, "brightness_range":[0.8,1.2]},  
+{"rotation_range":30, "zoom_range":0.2, "horizontal_flip":True},
+{"rotation_range":0, "zoom_range":0, "horizontal_flip":False}]
+Each configuration was trained for five epochs, and both validation accuracy and average computation time per epoch were recorded to measure performance.
+The system automatically stops iterating over new resolutions when accuracy improvements fall below 3\%, reducing unnecessary computation.
+
+
+Initial experiments at lower resolutions (128×128) with standard augmentation (rotation, brightness, and zoom variations) achieved validation accuracies around 57–58\%.
+Larger image resolutions are currently being evaluated to determine whether higher spatial detail leads to significant accuracy gains. The best configuration identified so far will be used to train the final CNN model, which is then validated and tested on separate data subsets.
+The final architecture employs a four-block convolutional neural network (Conv2D-MaxPooling layers) with dropout for regularization, compiled with binary cross-entropy loss and the Adam optimizer. Model performance is monitored across epochs using accuracy and loss curves saved as visual outputs. Test performance will be reported once all preprocessing configurations finish executing. For baselines, the model without augmentation and at lower resolutions serves as the control, while subsequent tests compare the impact of increasing image size and data augmentation strength.
+
