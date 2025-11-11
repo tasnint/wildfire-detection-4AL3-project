@@ -1,0 +1,13 @@
+The TA’s feedback centered on four key areas: ensuring reproducibility across experiments, clearly defining baselines for comparison, tracking computational efficiency and overfitting control.
+
+To ensure reproducibility, all preprocessing and augmentation experiments are handled by a single function.
+The function evaluates each configuration using the same dataset structure and parameters. This ensures consistent conditions across runs. Future improvements will include fixing random seeds for TensorFlow, NumPy, and data generators to make results fully repeatable.
+
+For baseline definition, the non-augmented, low-resolution model (128×128 with no transformations) is used as the baseline mostly. 
+Subsequent augmented models are quantitatively compared against this using validation accuracy and loss.
+
+To address computational efficiency, the experiment function tracks the average training time per epoch for each configuration, comparing between accuracy gains and processing cost. 
+Further refinement will involve logging this data to CSV and plotting runtime versus resolution to visualize performance scalability.
+
+The current implementation already includes an outer-loop early stopping criterion, halting new preprocessing experiments when accuracy improvements fall below 3\%. 
+However, an in-training early stopping callback will be added in future iterations to prevent overfitting during prolonged training runs.
