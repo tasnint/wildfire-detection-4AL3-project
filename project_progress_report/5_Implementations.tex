@@ -1,19 +1,21 @@
+Our code is built on the TensorFlow and ROCm software stacks. We used TensorFlow 2.19, ROCm 7.0.2, and Python 3.12.
+
 Our implementation is a feedforward classification model. 
-It is composed of TODO Conv2D layers of size TODO with ReLu activation, followed by a Dense layer with TODO units, and . 
-The model has TODO parameters in total, taking up about TODO MB in total.
-Before training, we optimized various parameters empirically. 
-We set out certain augmentations and resolutions to be tested, 
-then trained a model on every dimension of this space via nested for loops that can be found in our code. 
-This process is further outlined in the Features section. 
-The size of layers and the number of layers were determined by manual empirical testing.
+It is composed of 4 Conv2D layers of increasing sizes with ReLu activation, followed by a Dense layer with 256 units, and a final output node with sigmoid activation. To improve code reuse, the model is defined in build\_cnn.py which is called whenever the model is needed (during preprocessing testing and training).
+The model has 1,277,601 parameters in total, taking up about 4.87 MB in total.
+
+We currently have a dropout layer of 0.3 after the Conv2D layers and before the dense layer, though we will run further experiments on adding more dropout layers, regularization, and hyperparameter tuning.
+
+Before training, we optimized various parameters empirically. We set out certain augmentations and resolutions to be tested, then trained a model on every dimension of this space via nested for loops that can be found in our code. We use the ImageDataGenerator class to apply appropriate transformations to our data. The augmentations are further outlined in the Features section.
+The size of layers and the number of layers were determined by manual empirical testing, though this is still underway. Our current implementation also lacks early stopping during training.
+
+Mixed precision was considered, but not used. Mixed precision introduced computational errors that negatively impacted the accuracy of our model, and this did not outweigh the benefits in training speed.
+
+We did not implement any cross-validation beyond a basic training-testing-validation split. Training one model takes hours due to the large dataset, forcing us to run experiments overnight or letting it run during the day as we complete other tasks. Our experimentation speed is bottlenecked by the speed at which we can train our models, and cross-validation will likely take days of training. Given the large dataset, we believe that the simple split will be enough to draw conclusions from.
 
 To find the most optimized configuration for the classification model, the program checks for differnet resolution and augmentations combinations for the best performance.
-The program performs short epoch intervals session on the training data for each combination to identify which combination outputs the best validation accuracy. 
+The program performs short epoch intervals session on the training data for each combination to identify which combination outputs the best validation accuracy.
 
-The program utilizies a binary cross entropy as a loss function. This is good for binary classification
-,because it integrates nicely with the sigmoid activation function that outputs 0-1 probabililty values and
-penalizes confident predictions. It also provides a smooth gradient for backprogration and learning \cite{ref14_Arize2023BinaryCrossEntropy}.
+The program utilizies a binary cross entropy as a loss function. This is good for binary classification, because it integrates nicely with the sigmoid activation function that outputs 0-1 probabililty values and penalizes confident predictions. It also provides a smooth gradient for backprogration and learning \cite{ref14_Arize2023BinaryCrossEntropy}.
 
-Preliminary issues occured when implementing the code firsthand such as extremely long preprocessing times, and code the running indefinitely.
-The long prepocessing was fixed by increase batch sizes and simplifying the model. The infinite long run times was caused by a bug from earlier Tensflow version, 
-so the code was updated accordingly.         
+We faced numerous issues when implementing the code, such as extremely long preprocessing times, and the training code running indefinitely. The long prepocessing was fixed by increasing batch sizes and simplifying the model. The infinite training times was caused by a bug from earlier Tensorflow version, where a deadlock was introduced with TensorFlow 2.17. Our code was unfortunately deadlocked during training many times, and with inconsistent results we were forced to troubleshoot this issue for a few days. As all group members were able to reproduce this, we assumed the issue was with our code base which ended up being untrue. Upon discovering a relevant GitHub issue, the code was updated accordingly to use TensorFlow 2.19.

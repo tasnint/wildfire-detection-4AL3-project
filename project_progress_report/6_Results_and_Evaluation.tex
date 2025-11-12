@@ -1,5 +1,5 @@
 Our model evaluation process focuses on comparing different image preprocessing and augmentation configurations to identify the combination that offers the best trade-off between computational efficiency and classification accuracy.
-The array of pixel sizes we are testing includes pixelsizes TODO
+The array of pixel sizes we are testing includes pixel sizes, rotation, shifting height and width, zoom, flip, and brightness.
 Each configuration was trained for five epochs, and both validation accuracy and average computation time per epoch were recorded to measure performance.
 The system automatically stops iterating over new resolutions when accuracy improvements fall below 3\%, reducing unnecessary computation.
 
