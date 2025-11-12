@@ -73,6 +73,36 @@ test_loss, test_acc = model.evaluate(test_gen)
 print(f"Test Accuracy: {test_acc:.4f}")
 
 # ===============================
+# 6.1 Detailed Performance Metrics
+# ===============================
+from sklearn.metrics import confusion_matrix, classification_report, ConfusionMatrixDisplay
+import pandas as pd
+
+# Get true labels and predictions
+y_true = test_gen.classes
+y_pred_probs = model.predict(test_gen)
+y_pred = (y_pred_probs > 0.5).astype(int).flatten()
+
+# Compute confusion matrix
+cm = confusion_matrix(y_true, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["No Fire", "Fire"])
+disp.plot(cmap='Blues', values_format='d')
+plt.title("Confusion Matrix - Test Set")
+plt.show()
+
+# Compute precision, recall, F1, etc.
+report = classification_report(y_true, y_pred, target_names=["No Fire", "Fire"], output_dict=True)
+df_report = pd.DataFrame(report).transpose()
+
+# Print nicely formatted report
+print("\n===== Classification Report =====")
+print(df_report.round(3))
+
+# Save metrics table as CSV
+os.makedirs("results", exist_ok=True)
+df_report.to_csv("results/test_classification_report.csv", index=True)
+
+# ===============================
 # 7. Save Model and Training Curves
 # ===============================
 os.makedirs("models", exist_ok=True)
