@@ -1,0 +1,43 @@
+\begin{table}[htbp]
+    \centering
+    \caption{Classification report on test set (410 samples)}
+    \label{tab:classification_report}
+    \begin{tabular}{lcccc}
+        \hline
+        \textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+        \hline
+        No Fire & 0.722 & 0.881 & 0.793 & 159 \\
+        Fire & 0.912 & 0.785 & 0.844 & 251 \\
+        \hline
+        Accuracy & \multicolumn{3}{c}{0.822} & 410 \\
+        Macro avg & 0.817 & 0.833 & 0.818 & 410 \\
+        Weighted avg & 0.838 & 0.822 & 0.824 & 410 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% Reference in text:
+% Table~\ref{tab:classification_report} presents the detailed performance metrics.
+
+
+% Better formatted table with booktabs
+% Requires: \usepackage{booktabs} in preamble
+\begin{table}[htbp]
+    \centering
+    \caption{Performance metrics for wildfire detection model}
+    \label{tab:performance_metrics}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Metric} & \textbf{No Fire} & \textbf{Fire} \\
+        \midrule
+        Precision & 0.722 & 0.912 \\
+        Recall & 0.881 & 0.785 \\
+        F1-Score & 0.793 & 0.844 \\
+        Support & 159 & 251 \\
+        \midrule
+        \multicolumn{3}{l}{\textbf{Overall Metrics}} \\
+        \multicolumn{2}{l}{Test Accuracy} & 0.822 \\
+        \multicolumn{2}{l}{Test Loss} & 0.406 \\
+        \bottomrule
+    \end{tabular}
+\end{table}

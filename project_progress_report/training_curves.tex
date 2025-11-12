@@ -1,0 +1,24 @@
+% \begin{figure*}[t]
+%     \centering
+%     \includegraphics[width=0.85\textwidth]{models/training_curves_best.png}
+%     \caption{Training and validation metrics over 20 epochs...}
+%     \label{fig:training_curves}
+% \end{figure*}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\columnwidth]{results/accuracy_training_curves.png}
+    % NOT: width=\textwidth (this spans both columns)
+    % USE: width=\columnwidth (fits in one column)
+    \caption{Graph showing the training and validation accuracty over Epochs}
+    \label{fig:training_curve}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\columnwidth]{results/loss_training_curves.png}
+    % NOT: width=\textwidth (this spans both columns)
+    % USE: width=\columnwidth (fits in one column)
+    \caption{Graphing showing the train and validation loss over Epochs}
+    \label{fig:loss_curve}
+\end{figure}

@@ -5,11 +5,17 @@ The system automatically stops iterating over new resolutions when accuracy impr
 
 Initial experiments at lower resolutions (128×128) with standard augmentation (rotation, brightness, and zoom variations) achieved validation accuracies around 57 - 58\%.
 
-Larger image resolutions are currently being evaluated to determine whether higher spatial detail leads to significant accuracy gains. The best configuration identified so far will be used to train the final CNN model, which is then validated and tested on separate data subsets.
-
+Larger image resolutions improved the accuracy with higher spatial detail, leading to significant accuracy gains. The best configuration was identified during training for the final CNN model as the standard training augmentation, which was then validated and tested on separate data subsets. 
 The final architecture employs a four-block convolutional neural network (Conv2D-MaxPooling layers) with dropout for regularization, compiled with binary cross-entropy loss, a metric of accuracy, and the Adam optimizer. Model performance is monitored across epochs using accuracy and loss curves saved as visual outputs. Test performance will be reported once all preprocessing configurations finish executing. For baselines, the model without augmentation and at lower resolutions serves as the control, while subsequent tests compare the impact of increasing image size and data augmentation strength.
 
-Our current best model uses no augmentation and normalizes images to 224×224. This model achieves a training accuracy of 83.73\% and a validation accuracy of 79.85\%. However, this model is an early experiment and many areas of improvement were raised during the experimentation process. as outlined in the Feedback and Plans section.
+Our current best model uses the standard augmentation (minor changes) and normalizes images to 224×224. This model achieves a training accuracy of 83.73\% and a validation accuracy of 79.85\% as seen in Figure~\ref{fig:training_curve}, which is just below standard good model averages; however, this model is an early experiment, and many areas of improvement were raised during the experimentation process as outlined in the Feedback and Plans section.
+For Figures~\ref{fig:training_curve} and \ref{fig:loss_curve}, the training and validation curves converge around 13-16+ Epochs, meaning further Epochs could lead to strong overfitting. There is some instability and various spikes on curves, which means the model needs some improvement in terms of hyperparameter tuning, more test samples, or batch sizes.
+As shown in Tables~\ref{tab:classification_report} and \ref{tab:performance_metrics}, precision, specificity, and overall performance hoevers arounds 72-88\% with the main weakness being a relative high false negative rate shown in the confusion matrix in Figure~\ref{fig:confusion_matrix} that needs to be addresss majory in order to this model to be viable in identifying real fires.
+
+% Based on the confusion and the proceeding training and loss curves over epochs
+
+\input{confusion_matrix.tex}
+\input{training_curves.tex}
 
 % To evaluate model performance, the following classification metrics are computed on the test set:
 % \setlength{\tabcolsep}{2pt}
