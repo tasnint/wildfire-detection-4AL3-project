@@ -1,14 +1,14 @@
 The feature set for our model comprises of the pixel values from the images themselves. 
 The images are mainly RGB type images meaning they compose of three colour channels red, green, and blue. 
 The resolution also dictates the number of pixels within a given image. 
-For example, a 128x128 resolution image means there are 128 * 128 * 3 = 49152 feature values that corresponds to
+For example, a 128×128 resolution image means there are 128 × 128 × 3 = 49152 feature values that corresponds to
 the RGB colour values. The higher the resolution more features there are and vice versa. 
-During preprocesssing, the images are compressed to a fixed resolution (128x128, 224x224, etc...),
+During preprocesssing, the images are compressed to a fixed resolution (128×128, 224×224, etc...),
  so that the input array remains the same. The pixel values are placed in 3D-dimensional matrix.
 This form of feature engineering alows for spacial recognition and patten extraction on a 3D space. 
 These values are also normalized for efficiency and robustness.
 Different resolutions sizes were experimented on to see if the increase in pixel sizes (and feature length)
-would increase the accuracy or validity of the model; ranging from 128x128, 224x224, 299x299, and 1000x1000.
+would increase the accuracy or validity of the model; ranging from 128×128, 224×224, 299×299, and 1000×1000.
 The following augmentations were used to vary the pixel locations so that the model becomes invariant to orientation,
 position and scale; rotation range rotates the pixels from a random angle,
 width shift range shift the images left and right, height shift range shifts the images up and down,
