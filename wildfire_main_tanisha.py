@@ -43,28 +43,119 @@ test_gen = test_datagen.flow_from_directory(
 # ===============================
 model = models.Sequential([
     layers.Conv2D(16, (3, 3), activation='relu', padding='same', input_shape=(best_size[0], best_size[1], 3)),
+    layers.BatchNormalization(),
     layers.MaxPooling2D((2, 2)),
     layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+    layers.BatchNormalization(),
     layers.MaxPooling2D((2, 2)),
     layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+    layers.BatchNormalization(),
     layers.MaxPooling2D((2, 2)),
     layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
+    layers.BatchNormalization(),    
     layers.MaxPooling2D((2, 2)),
     layers.Dropout(0.3),
-    layers.Flatten(),
-    layers.Dense(256, activation='relu'),
-    layers.Dropout(0.5),
+
+    # layers.Flatten(),
+    # layers.Dense(256, activation='relu'),
+    # layers.Dropout(0.5),
+    # layers.Dense(1, activation='sigmoid')
+
+    # ============================================
+    #  REPLACEMENT: Global Average Pooling layer
+    # --------------------------------------------
+    # GAP drastically reduces parameters compared to Flatten.
+    # Instead of flattening the entire feature map (which produces tens/hundreds 
+    # of thousands of values), GAP averages each feature map into a single number.
+    #
+    # Benefits:
+    #   • Less overfitting
+    #   • Fewer parameters → faster training
+    #   • Better generalization (especially for large datasets like ours which is 9.9GB)
+    #   • Mimics behavior of modern CNNs (ResNet, EfficientNet)
+    # ============================================
+    layers.GlobalAveragePooling2D(),
+
+    # Smaller Dense layer to reduce parameters and overfitting risk
+    # --------------------------------------------------------------
+    # Why Dense(128) instead of Dense(256) after GlobalAveragePooling?
+    # --------------------------------------------------------------
+    # Before using GAP, the model used Flatten(), which produced a VERY 
+    # large vector (e.g., 8×8×128 = 8192 values). Feeding this into a 
+    # Dense(256) layer required over 2 million parameters, which is large,
+    # slow to train, and prone to overfitting.
+    #
+    # After switching to GlobalAveragePooling2D(), the feature map is 
+    # reduced to just 128 values (one per feature channel). Because the
+    # input vector is now much smaller, we no longer need a large 256-unit 
+    # dense layer. A Dense(128) layer is a natural fit:
+    #
+    #    - fewer parameters (16k instead of 2M+) → prevents overfitting
+    #    - faster training and inference
+    #    - matches modern CNN architecture patterns (ResNet/MobileNet)
+    #
+    # In short: GAP dramatically shrinks the feature vector, so reducing
+    # the dense layer size to 128 keeps the model efficient, stable, and 
+    # better-regularized.
+# --------------------------------------------------------------
+
+    layers.Dense(128, activation='relu'),
+    layers.Dropout(0.4),
+
+    # Final output neuron (binary classification)
     layers.Dense(1, activation='sigmoid')
+
 ])
 
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-              loss='binary_crossentropy', metrics=['accuracy'])
+# ============================================
+#  OPTIMIZER + CALLBACKS (Adaptive Learning Rate)
+# ============================================
+
+# Adam optimizer with automatic adaptive learning rate.
+# (We do NOT manually specify a learning_rate, so Adam
+#  uses its built-in adaptive LR mechanism.)
+optimizer = tf.keras.optimizers.Adam()
+# Automatically reduce the learning rate when validation loss stops improving.
+# This helps stabilize training and escape plateaus.
+lr_scheduler = tf.keras.callbacks.ReduceLROnPlateau(
+    monitor='val_loss',     # watch validation loss
+    factor=0.5,             # reduce LR by 50%
+    patience=3,             # wait 3 epochs of no improvement
+    min_lr=1e-6             # do not let LR fall below this
+)
+
+# Stop training when validation loss stops improving
+# and restore the best model weights.
+early_stop = tf.keras.callbacks.EarlyStopping(
+    monitor='val_loss',
+    patience=5,
+    restore_best_weights=True
+)
+
+
+# Compile the model with binary crossentropy loss (binary classification)
+model.compile(
+    optimizer=optimizer,
+    loss='binary_crossentropy',
+    metrics=['accuracy']
+)
 model.summary()
 
 # ===============================
 # 5. Train Final Model
 # ===============================
-history = model.fit(train_gen, epochs=20, validation_data=val_gen)
+# ============================================
+#  TRAINING LOOP WITH CALLBACKS
+# ============================================
+# The callbacks enable:
+#   - automatic LR tuning (ReduceLROnPlateau)
+#   - preventing overfitting (EarlyStopping)
+history = model.fit(
+    train_gen,
+    epochs=20,
+    validation_data=val_gen,
+    callbacks=[lr_scheduler, early_stop]
+)
 
 # ===============================
 # 6. Evaluate on Test Set
