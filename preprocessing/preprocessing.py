@@ -2,7 +2,16 @@
 import time
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import models, layers
+import psutil
+import tensorflow as tf
 
+def has_enough_memory(required_gb=4):
+    """Check if available RAM is above a safe threshold."""
+    mem = psutil.virtual_memory()
+    available_gb = mem.available / (1024**3)
+    print(f"[MEMORY CHECK] Available RAM: {available_gb:.2f} GB")
+
+    return available_gb > required_gb
 
 def build_cnn(input_shape):
     """Builds a simple CNN for binary classification (Fire / No Fire)."""
@@ -33,19 +42,19 @@ def run_preprocessing_experiments(base_dir, pixel_sizes=None, augmentations=None
     """Runs experiments over multiple resolutions and augmentation sets."""
     if pixel_sizes is None:
         # pixel_sizes = [(128,128), (224,224), (299,299), (1000,1000)]
-        pixel_sizes = [(128,128)]
+        pixel_sizes = [(299,299), (1000,1000)]
 
     if augmentations is None:
-        # augmentations = [
-        #     {"rotation_range":15, "width_shift_range":0.1, "height_shift_range":0.1,
-        #      "zoom_range":0.1, "horizontal_flip":True, "brightness_range":[0.8,1.2]},  # Standard
-        #     {"rotation_range":30, "zoom_range":0.2, "horizontal_flip":True},            # Stronger
-        #     {"rotation_range":0, "zoom_range":0, "horizontal_flip":False},              # Minimal
-        # ]
         augmentations = [
             {"rotation_range":15, "width_shift_range":0.1, "height_shift_range":0.1,
              "zoom_range":0.1, "horizontal_flip":True, "brightness_range":[0.8,1.2]},  # Standard
+            {"rotation_range":30, "zoom_range":0.2, "horizontal_flip":True},            # Stronger
+            {"rotation_range":0, "zoom_range":0, "horizontal_flip":False},              # Minimal
         ]
+        # augmentations = [
+        #     {"rotation_range":15, "width_shift_range":0.1, "height_shift_range":0.1,
+        #      "zoom_range":0.1, "horizontal_flip":True, "brightness_range":[0.8,1.2]},  # Standard
+        # ]
 
     results = []
     best_config = None
@@ -61,14 +70,27 @@ def run_preprocessing_experiments(base_dir, pixel_sizes=None, augmentations=None
         # Inner loop → augmentations
         for aug in augmentations:
             print(f"   → Trying augmentation: {aug}")
+            # Auto-adjust batch size for large resolutions to avoid OOM
+            if size[0] >= 1000:
+                batch_size = 2     # VERY small for huge images
+            elif size[0] >= 300:
+                batch_size = 8
+            elif size[0] >= 224:
+                batch_size = 16
+            else:
+                batch_size = 32
+        
+            if not has_enough_memory():
+                print("   [SKIP] Not enough memory for this configuration.")
+                continue
 
             train_datagen = ImageDataGenerator(rescale=1./255, **aug)
             val_datagen = ImageDataGenerator(rescale=1./255)
 
             train_gen = train_datagen.flow_from_directory(
-                f"{base_dir}/train", target_size=size, batch_size=32, class_mode='binary')
+                f"{base_dir}/train", target_size=size, batch_size=batch_size, class_mode='binary')
             val_gen = val_datagen.flow_from_directory(
-                f"{base_dir}/val", target_size=size, batch_size=32, class_mode='binary')
+                f"{base_dir}/val", target_size=size, batch_size=batch_size, class_mode='binary')
 
             model = build_cnn((size[0], size[1], 3))
 
@@ -91,10 +113,11 @@ def run_preprocessing_experiments(base_dir, pixel_sizes=None, augmentations=None
                 best_config = (size, aug, val_acc)
 
         # Early stop between pixel sizes (Δacc < 0.03)
-        if (size_best_val - prev_best_val_acc) < 0.03 and size_best_val > prev_best_val_acc:
+        if size_best_val - prev_best_val_acc < 0.03:
             print(f"Early stopping: improvement < 0.03 "
-                  f"({prev_best_val_acc:.4f} → {size_best_val:.4f})")
+                f"({prev_best_val_acc:.4f} → {size_best_val:.4f})")
             break
+
 
         prev_best_val_acc = size_best_val
 
