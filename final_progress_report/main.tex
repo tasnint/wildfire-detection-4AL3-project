@@ -1,0 +1,88 @@
+\documentclass[11pt]{article}
+
+% Change "review" to "final" to generate the final (sometimes called camera-ready) version.
+% Change to "preprint" to generate a non-anonymous version with page numbers.
+\usepackage[numbers]{natbib}
+\usepackage[]{acl}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{booktabs}
+% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
+\usepackage[T1]{fontenc}
+
+% This assumes your files are encoded as UTF8
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{inconsolata}
+\usepackage{graphicx}
+
+
+\title{Group 73 Final Report:\\Wildfire Detection Classification Plan}
+
+
+\author{Andy Huynh, Berk Yilmaz, Tanisha Tasnin \\
+  \textbf{huynha3@mcmaster.ca}, \textbf{yilmag1@mcmaster.ca},  \textbf{tasnint@mcmaster.ca}}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+% Here, write a brief introduction to the problem you are solving. This can be adapted from your problem description and motivation from the original proposal. This should be around 0.25-0.5 pages.
+\input{1_Introduction.tex}
+
+% Here, talk about the related work you encountered for your approach. Cite at least 5 references. Refer to item 2. No one has done exactly your task? Write about the most similar thing you can find. This should be around 0.25-0.5 pages.
+% \section{Related Work}
+% \input{2_Related_Work.tex}
+
+% You should write about your dataset here, following the guidelines regarding item 1. This section may be 0.5-1 pages. Depending on your specific dataset, you may want to include subsections for the preprocessing, annotation, etc.
+\section{Dataset}
+\input{2_Dataset.tex}
+
+% Describe any features you used for your model, or how your data was input to your model. Are you doing feature engineering or feature selection? Are you learning embeddings? Is it all part of one neural network? Refer to item 2. This may range from 0.25 pages to 0.5 pages.
+\section{Features and Inputs}
+\input{3_Features.tex}
+
+% Describe your model and implementation here. Refer to item 4. This may take around a page.
+\section{Implementation}
+\input{4_Implementations.tex}
+
+% How are you evaluating your model? What results do you have so far? What are your baselines? Refer to item 5. This may take around 0.5 pages.
+\section{Evaluation}
+\input{5_Evaluation.tex}
+
+% Write about your plans for the remainder of the project. This should include a discussion of the feedback you received from your TA, and how you plan to improve your approach. Reflect on your implementation and areas for improvement. Refer to item 6. This may be around 0.5 pages.
+\section{Progress}
+\input{6_Progress.tex}
+
+\section{Error Analysis}
+\input{7_Error_Analysis.tex}
+
+
+% *****************************************************************************************
+% OPTIONAL SECTION 8: TEMPLATE NOTES, REFERENCES, TABLES AND FIGURES, EQUATIONS
+% \input{8_Template_Notes}
+% \section*{Limitations}
+% *****************************************************************************************
+
+
+% Write in this section a few sentences describing the contributions of each team member. What did each member work on? Refer to item 7.
+\section*{Team Contributions}
+\input{8_Team_Contributions.tex}
+
+% \section*{Tables}
+% \input{tables.tex}
+
+% Bibliography entries for the entire Anthology, followed by custom entries
+%\bibliography{custom,anthology-overleaf-1,anthology-overleaf-2}
+% Custom bibliography entries only
+\bibliographystyle{acl_natbib}
+\bibliography{custom}
+
+
+% \appendix
+% \section{Example Appendix}
+% \label{sec:appendix}
+% This is an appendix.
+
+\end{document}
