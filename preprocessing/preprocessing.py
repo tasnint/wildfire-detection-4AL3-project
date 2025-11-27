@@ -80,9 +80,9 @@ def run_preprocessing_experiments(base_dir, pixel_sizes=None, augmentations=None
             else:
                 batch_size = 32
         
-            if not has_enough_memory():
-                print("   [SKIP] Not enough memory for this configuration.")
-                continue
+            # if not has_enough_memory():
+            #     print("   [SKIP] Not enough memory for this configuration.")
+            #     continue
 
             train_datagen = ImageDataGenerator(rescale=1./255, **aug)
             val_datagen = ImageDataGenerator(rescale=1./255)
