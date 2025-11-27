@@ -8,15 +8,19 @@ def build_cnn(input_shape):
     """Builds a simple CNN for binary classification (Fire / No Fire)."""
     model = models.Sequential([
         layers.Conv2D(16, (3,3), activation='relu', padding='same', input_shape=input_shape),
+        layers.BatchNormalization(),
         layers.MaxPooling2D(2,2),
 
         layers.Conv2D(32, (3,3), activation='relu', padding='same'),
+        layers.BatchNormalization(),
         layers.MaxPooling2D(2,2),
 
         layers.Conv2D(64, (3,3), activation='relu', padding='same'),
+        layers.BatchNormalization(),
         layers.MaxPooling2D(2,2),
 
         layers.Conv2D(128, (3,3), activation='relu', padding='same'),
+        layers.BatchNormalization(),
         layers.MaxPooling2D(2,2),
 
         layers.Dropout(0.3),
@@ -39,7 +43,7 @@ def run_preprocessing_experiments(base_dir, pixel_sizes=None, augmentations=None
     # NOTE: 1000x1000 is extremely computationally expensive and may cause OOM errors if
     # batch size is not reduced (we handle this below with a dynamic batch-size rule).
     if pixel_sizes is None:
-        pixel_sizes = [(128,128), (224,224), (299,299), (1000,1000)]
+        pixel_sizes = [(224,224),(299,299), (1000,1000)]
         # pixel_sizes = [(128,128)]
 
     # Multiple augmentation configurations:
