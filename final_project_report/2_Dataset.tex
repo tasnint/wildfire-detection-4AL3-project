@@ -1,9 +1,81 @@
-Lorem ipsum dolor sit amet, consectetur adipiscing
-elit, sed do eiusmod tempor incididunt ut labore et
-dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut
-aliquip ex ea commodo consequat. Duis aute irure
-dolor in reprehenderit in voluptate velit esse cil-
-lum dolore eu fugiat nulla pariatur. Excepteur sint
-occaecat cupidatat non proident, sunt in culpa qui
-officia deserunt mollit anim id est laborum. [1]
+Our research utilizes the Wildfire Dataset, specifically Version 2 as published in the article \textit{"The Wildfire Dataset: Enhancing Deep Learning-Based Forest Fire Detection with a Diverse Evolving Open-Source Dataset Focused on Data Representativeness and a Novel Multi-Task Learning Approach"} by El-Madafri et al. \cite{ref8_elmadafri2023wildfiredataset}. This dataset serves as a comprehensive benchmark for evaluating deep learning approaches to forest fire detection, addressing the critical need for reliable wildfire monitoring systems.
+
+\subsection{Data Sources and Composition}
+
+The Wildfire Dataset comprises 2,700 high-resolution RGB images collected from diverse sources including government databases (such as NASA and USGS), social media platforms like Flickr, and public domain image repositories such as Unsplash. These sources were selected to ensure geographic diversity across different forest ecosystems worldwide.
+
+The dataset follows a two-class binary classification structure:
+\begin{itemize}
+    \item \textbf{Fire}: Images showing evident fire-related phenomena
+    \item \textbf{No Fire}: Forested areas without any signs of fire or smoke
+\end{itemize}
+
+The dataset dataset is provided in training (70\%), validation (15\%), and test sets (15\%) with consistent class distribution across all subsets:
+
+\begin{table}[h!]
+    \centering
+    \caption{Dataset partition distribution}
+    \label{tab:dataset_distribution}
+    \begin{tabular}{lrrr}
+        \toprule
+        Set & Total Images & Fire Images & No-Fire Images \\
+        \midrule
+        Train & 1,888 & 642 & 1,246 \\
+        Validation & 402 & 139 & 263 \\
+        Test & 410 & 109 & 301 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+This distribution maintained a roughly consistent class ratio of approximately 1 fire image for every 1.5-2 no-fire images across all partitions, preserving the original dataset's imbalance while allowing proper evaluation.
+
+\subsection{Dataset Characteristics}
+
+The Wildfire Dataset is characterized by substantial resolution variability, which presents both challenges and opportunities for deep learning models:
+
+\begin{itemize}
+    \item Average Resolution: $4057 \times 3155$ pixels
+    \item Minimum Resolution: $153 \times 206$ pixels
+    \item Maximum Resolution: $19699 \times 8974$ pixels
+    \item Standard Deviation (Width): 1867.47 pixels
+    \item Standard Deviation (Height): 1388.60 pixels
+\end{itemize}
+
+This significant variability in image dimensions required careful preprocessing to ensure computational feasibility while maintaining the integrity of visual information.
+
+\subsection{Preprocessing Steps}
+
+Our preprocessing pipeline was designed to address the dataset's unique characteristics and enhance model performance:
+
+\subsubsection{Initial Processing}
+The images were organized into a directory structure with clear separation between training, validation, and test sets. Images are directly placed under "fire" or "nofire" subdirectories (as per Version 2 simplification), eliminating nested subdirectories to enhance accessibility and facilitate analysis.
+
+\subsubsection{Resolution Normalization}
+Given the substantial resolution range in the dataset, we conducted extensive preprocessing experiments to identify optimal image size. The final configuration selected during experimentation was $224 \times 224$ pixels after testing multiple resolutions (128×128 and 224×224 primarily). This decision was made empirically, as it provided the best results with the model we designed.
+
+\subsubsection{Data Augmentation}
+For the training phase, we experimented with the following augmentations:
+\begin{itemize}
+    \item Rotation range: $\pm$15 degrees
+    \item Horizontal shift range: up to 10\% of width
+    \item Vertical shift range: up to 10\% of height
+    \item Zoom range: up to 10\%
+    \item Horizontal flip (enabled)
+    \item Brightness adjustment (range from 80\%-120\%)
+\end{itemize}
+This augmentation strategy aimed to increase model robustness while preventing overfitting, particularly important given the dataset's resolution variability. However, in our final iteration we did not end up using most of these. [TODO: which did we actually use?]
+
+\subsubsection{Data Normalization}
+All images were normalized with rescaling by a factor of $1/255.0$ to ensure consistent input range for the neural network. This preprocessing step standardizes pixel values across the entire image set and improves model convergence.
+
+The dataset is licensed under CC BY 4.0, which allows use for our purposes with appropriate attribution to the original authors and publication.
+
+\subsection{Dataset Evolution and Quality Assurance}
+
+This version of the Wildfire Dataset represents a carefully curated collection designed for machine learning applications in forest fire detection. The researchers specifically focused on data representativeness by including:
+\begin{itemize}
+    \item Images from diverse geographic locations across different continents
+    \item A wide range of environmental conditions (e.g., time of day, weather conditions)
+    \item Different types of forest ecosystems and vegetation
+    \item Various wildfire stages, from early ignition to fully developed flames
+\end{itemize}
