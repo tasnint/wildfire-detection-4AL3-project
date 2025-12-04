@@ -139,7 +139,7 @@ early_stop = tf.keras.callbacks.EarlyStopping(
 
 # Compile the model with binary crossentropy loss (binary classification)
 model.compile(
-    optimizer=optimizer,
+    optimizer=optimizer,a
     loss='binary_crossentropy',
     metrics=['accuracy']
 )
