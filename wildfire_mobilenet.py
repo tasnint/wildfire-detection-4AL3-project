@@ -153,7 +153,7 @@ print("\nTraining MobileNetV2 for Wildfire Detection...")
 print("Ideal for mobile deployment: drones, smartphones, edge devices")
 history = model.fit(
     train_gen,
-    epochs=30,
+    epochs=15,
     validation_data=val_gen,
     callbacks=[lr_scheduler, early_stop]
 )

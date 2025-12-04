@@ -1,9 +1,16 @@
-Lorem ipsum dolor sit amet, consectetur adipiscing
-elit, sed do eiusmod tempor incididunt ut labore et
-dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut
-aliquip ex ea commodo consequat. Duis aute irure
-dolor in reprehenderit in voluptate velit esse cil-
-lum dolore eu fugiat nulla pariatur. Excepteur sint
-occaecat cupidatat non proident, sunt in culpa qui
-officia deserunt mollit anim id est laborum. [1]
+The input to all models consists of raw RGB image pixels, treated as the feature vector for each example. 
+Because CNNs require inputs of uniform dimensionality, all images were resized to a fixed resolution prior to training. 
+Multiple resolutions were tested: 128×128, 224×224, 299×299, and 1000×1000. 
+These examined how increasing the number of pixels (and thus the feature dimensionality) affects model performance. 
+The specific numbers for pixel sizes were chosen based on commonly discussed and used pixel sizes for CNN's found in the various cited online sources \cite{stackoverflow_48954724}, \cite{stackoverflow_43434418}.
+However, resolutions above 224×224 caused out-of-memory (OOM) failures on our RAM due to the rapid growth in tensor sizes and batch memory requirements. 
+We tried running the higher resolution experiments on Google Cloud as well but due to limitations on our billing account, we were unable to allocate sufficient GPU resources to handle the larger resolutions as well.
+As a result, larger resolutions were excluded from final experiments.
+
+During preprocessing, images were normalized to the 
+[0, 1] range to stabilize training and improve convergence. A manual inspection of the dataset revealed a small number of incorrectly labeled images, which introduced noise into the feature space; this observation further motivated the use of robust architectures and augmentations that help models generalize under imperfect labels.
+To enhance the diversity of the training samples and make the models invariant to orientation, position, and scale, we applied several image augmentations: random rotations, width and height shifts, zooming, and horizontal flips.
+The idea to vary the pixel size and augmentations was inspired from an online project tutorial which developed a Malaria Detection model using TensorFlow’s malaria dataset \cite{ref12_tensorflow2023malaria}, \cite{ref13_microscopist2023malaria}.
+The scope and scale of the Malaria Detection project were similar to ours, and we adapted their augmentation strategies to our wildfire dataset.
+These transformations effectively vary the spatial arrangement of pixel features while preserving semantic content, allowing the models to learn more resilient representations.
+Overall, no handcrafted feature engineering was performed; instead, the CNN architectures learn hierarchical feature representations directly from pixel data. By varying both image resolution and augmentation strategies, we were able to study how feature dimensionality and data variability affect wildfire detection performance across different models.

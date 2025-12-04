@@ -141,7 +141,7 @@ model.compile(
 print("\nTraining EfficientNet-B0 for Wildfire Detection...")
 history = model.fit(
     train_gen,
-    epochs=30,
+    epochs=15,
     validation_data=val_gen,
     callbacks=[lr_scheduler, early_stop]
 )
