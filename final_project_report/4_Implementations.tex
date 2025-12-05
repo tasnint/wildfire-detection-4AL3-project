@@ -1,9 +1,58 @@
-Lorem ipsum dolor sit amet, consectetur adipiscing
-elit, sed do eiusmod tempor incididunt ut labore et
-dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut
-aliquip ex ea commodo consequat. Duis aute irure
-dolor in reprehenderit in voluptate velit esse cil-
-lum dolore eu fugiat nulla pariatur. Excepteur sint
-occaecat cupidatat non proident, sunt in culpa qui
-officia deserunt mollit anim id est laborum. [1]
+\subsection{Model Architecture Evolution}
+
+The initial implementation used a basic CNN architecture with four convolutional blocks, followed by dense layers. However, this approach suffered from overfitting issues (as evidenced in our progress report results). To address these limitations, we experimented with three modern architectures:
+
+\begin{itemize}
+\item \textbf{ResNet18}: A deep residual network that mitigates vanishing gradient problems through skip connections
+\item \textbf{MobileNetV2}: An efficient architecture designed for mobile devices with depthwise separable convolutions
+\item \textbf{EfficientNet-B0}: A scaled version of the EfficientNet family optimized for accuracy and efficiency trade-offs
+\end{itemize}
+
+These models were selected based on their proven performance in similar computer vision tasks, particularly those requiring efficient resource usage. We implemented these architectures using TensorFlow's Keras API with pre-trained ImageNet weights to leverage transfer learning.
+
+The final implementation used MobileNetV2 as our primary model. This decision was reached empirically; it was the best performer among our experiments.
+
+We also replaced the traditional Flatten layer with GlobalAveragePooling2D (GAP), which significantly reduced parameter count while maintaining accuracy.
+
+\subsection{Preprocessing Optimization}
+
+The preprocessing experiments included:
+\begin{itemize}
+\item Standard augmentation (rotation ±15°, horizontal/vertical shifts up to 10\%, zoom range of 10%)
+\item Horizontal flip enabled for all training images
+\item Brightness adjustment between 80-120%
+\item Pixel normalization by 1/255.0
+\end{itemize}
+
+We ultimately selected 224×224 pixels as the optimal size as the best trade-off between detail preservation and computational feasibility. We normalize pixels between 1 and 255. None of the other preprocessing methods helped improve performance.
+
+Compared to our last check-in, our accuracy improved from around 76\% to TODO: SEE ANDY'S WORK\%.
+
+\subsection{Training Strategy and Optimization}
+
+We implemented several key training strategies to address the challenges encountered during our progress report:
+
+\begin{itemize}
+\item \textbf{Adaptive Learning Rate}: Using TensorFlow's ReduceLROnPlateau callback with factor=0.5, patience=3 epochs
+\item \textbf{Early Stopping}: Implemented with patience=5 epochs to prevent overfitting (as shown in the training curves)
+\item \textbf{Batch Size Adjustment}: Dynamically adjusted batch size based on resolution (224×224 → batch size of 16)
+\item \textbf{Loss Function Selection}: Binary crossentropy with sigmoid activation for binary classification
+\end{itemize}
+
+The training process was optimized to balance computational efficiency and model performance. We observed that the MobileNetV2 implementation (Figure 1) achieved a validation accuracy of approximately 89\% after just 6 epochs, demonstrating rapid convergence compared to our initial CNN approach. TODO: MAYBE CHANGE THIS?
+
+\subsection{Error Analysis Implementation}
+
+Our error analysis revealed the following:
+
+\begin{itemize}
+\item The confusion matrix showed significant false negatives (54 cases), indicating the model struggles with early-stage fires @TODO: FACT CHECK
+\item Precision for fire detection was 0.912, but recall was only 0.785, highlighting a need to improve sensitivity @TODO: FACT CHECK
+\item Analysis of misclassified images revealed patterns:
+* Small-resolution images where fine details were lost
+* Scenes with low contrast between smoke and background elements
+* Images containing confounders like clouds or water reflections
+* Some data points were mislabelled from the dataset
+\end{itemize}
+
+The final model achieved a test accuracy of 82.2\% @TODO: FACT CHECK with precision and recall values that balanced well for this critical application (Table 1). This represents significant improvement over our initial baseline while maintaining computational efficiency suitable for real-world deployment scenarios.
