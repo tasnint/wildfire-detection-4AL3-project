@@ -1,6 +1,5 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models
-from tensorflow.keras.applications import MobileNetV2
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -8,7 +7,9 @@ from sklearn.metrics import confusion_matrix, classification_report, ConfusionMa
 from sklearn.metrics import roc_curve, roc_auc_score, precision_recall_curve, average_precision_score
 import pandas as pd
 from tensorflow.keras.preprocessing import image
-import time
+
+# Import preprocessing experiment logic
+from preprocessing.preprocessing import run_preprocessing_experiments
 
 # Setup
 base_dir = "data"
@@ -60,89 +61,99 @@ def analyze_dataset_distribution(base_dir):
 dataset_stats = analyze_dataset_distribution(base_dir)
 
 # ===============================
-# 2. PREPROCESSING
+# 2. RUN PREPROCESSING EXPERIMENTS
 # ===============================
-IMG_SIZE = (224, 224)
+print("Starting preprocessing & augmentation experiments...")
+best_config, results = run_preprocessing_experiments(base_dir, epochs=5)
+best_size, best_aug, best_acc = best_config
+print(f"\nUsing best preprocessing config: {best_size}, augmentation={best_aug}")
+
+# ===============================
+# 3. PREPARE DATA WITH BEST CONFIG
+# ===============================
 BATCH_SIZE = 64
 
-print(f"Config: {IMG_SIZE}, Batch={BATCH_SIZE}\n")
+train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255, **best_aug)
+val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
+test_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
+
+train_gen = train_datagen.flow_from_directory(
+    train_dir, target_size=best_size, batch_size=BATCH_SIZE, class_mode='binary')
+val_gen = val_datagen.flow_from_directory(
+    val_dir, target_size=best_size, batch_size=BATCH_SIZE, class_mode='binary')
+test_gen = test_datagen.flow_from_directory(
+    test_dir, target_size=best_size, batch_size=BATCH_SIZE, class_mode='binary', shuffle=False)
+
+print(f"\nBatch size: {BATCH_SIZE}")
 
 # ===============================
-# 3. BUILD MOBILENETV2 MODEL WITH ARCHITECTURAL DETAILS
+# 4. BUILD CNN MODEL WITH ARCHITECTURAL DETAILS
 # ===============================
-def build_mobilenet_wildfire(input_shape, num_classes=1, alpha=1.0):
+def build_cnn_wildfire(input_shape, num_classes=1):
     print("\n" + "="*80)
-    print(" BUILDING MOBILENETV2 MODEL")
+    print(" BUILDING CUSTOM CNN MODEL")
     print("="*80)
     
-    base_model = MobileNetV2(
-        include_top=False,
-        weights='imagenet',
-        input_shape=input_shape,
-        alpha=alpha,
-        pooling='avg'
-    )
-    
-    freeze_until = int(len(base_model.layers) * 0.5)
-    for layer in base_model.layers[:freeze_until]:
-        layer.trainable = False
+    model = models.Sequential([
+        layers.Conv2D(16, (3, 3), activation='relu', padding='same', input_shape=input_shape),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D((2, 2)),
+        
+        layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D((2, 2)),
+        
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D((2, 2)),
+        
+        layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
+        layers.BatchNormalization(),    
+        layers.MaxPooling2D((2, 2)),
+        layers.Dropout(0.3),
+        
+        layers.GlobalAveragePooling2D(),
+        layers.Dense(128, activation='relu'),
+        layers.Dropout(0.4),
+        layers.Dense(num_classes, activation='sigmoid')
+    ])
     
     print(f"\nArchitecture:")
-    print(f"  Base: MobileNetV2 (ImageNet pretrained)")
-    print(f"  Total Layers: {len(base_model.layers)}")
-    print(f"  Frozen: {freeze_until} layers (50%)")
-    print(f"  Trainable: {len(base_model.layers)-freeze_until} layers (50%)")
-    print(f"  Building block: Inverted Residual (narrow->wide->narrow)")
-    print(f"  Convolution: Depthwise Separable (8-9x efficiency)")
-    print(f"  Width multiplier (alpha): {alpha}")
-    print(f"  Expansion ratio: 6x")
-    
-    inputs = layers.Input(shape=input_shape)
-    x = tf.keras.applications.mobilenet_v2.preprocess_input(inputs * 255.0)
-    x = base_model(x, training=False)
-    x = layers.Dropout(0.5, name='dropout_1')(x)
-    x = layers.Dense(128, activation='relu', name='dense_1')(x)
-    x = layers.Dropout(0.3, name='dropout_2')(x)
-    outputs = layers.Dense(num_classes, activation='sigmoid', name='output')(x)
-    
-    model = models.Model(inputs=inputs, outputs=outputs)
-    
-    print(f"\nHead: GlobalAvgPool → Dropout(0.5) → Dense(128)")
-    print(f"      → Dropout(0.3) → Dense(1, Sigmoid)")
+    print(f"  Layer 1: Conv2D(16, 3x3) -> BN -> MaxPool(2x2)")
+    print(f"  Layer 2: Conv2D(32, 3x3) -> BN -> MaxPool(2x2)")
+    print(f"  Layer 3: Conv2D(64, 3x3) -> BN -> MaxPool(2x2)")
+    print(f"  Layer 4: Conv2D(128, 3x3) -> BN -> MaxPool(2x2) -> Dropout(0.3)")
+    print(f"  Head: GlobalAvgPool -> Dense(128) -> Dropout(0.4) -> Dense(1, Sigmoid)")
+    print(f"  Regularization: BatchNorm + Dropout(0.3, 0.4)")
     print("="*80 + "\n")
     
     return model
 
-input_shape = (IMG_SIZE[0], IMG_SIZE[1], 3)
-model = build_mobilenet_wildfire(input_shape, 1, alpha=1.0)
+input_shape = (best_size[0], best_size[1], 3)
+model = build_cnn_wildfire(input_shape, 1)
+model.summary()
 
-print(f"Total params: {model.count_params():,}")
-print(f"Trainable params: {sum([tf.size(w).numpy() for w in model.trainable_weights]):,}\n")
-
-# ===============================
-# 4. DATA PREPARATION
-# ===============================
-train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-    rescale=1./255,
-    rotation_range=15,
-    width_shift_range=0.1,
-    height_shift_range=0.1,
-    zoom_range=0.1,
-    horizontal_flip=True
-)
-val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
-test_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255)
-
-train_gen = train_datagen.flow_from_directory(train_dir, target_size=IMG_SIZE, batch_size=BATCH_SIZE, class_mode='binary')
-val_gen = val_datagen.flow_from_directory(val_dir, target_size=IMG_SIZE, batch_size=BATCH_SIZE, class_mode='binary')
-test_gen = test_datagen.flow_from_directory(test_dir, target_size=IMG_SIZE, batch_size=BATCH_SIZE, class_mode='binary', shuffle=False)
+print(f"\nTotal params: {model.count_params():,}\n")
 
 # ===============================
-# 5. COMPILE & TRAIN
+# 5. COMPILE MODEL
 # ===============================
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
-lr_scheduler = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr=1e-7, verbose=1)
-early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=7, restore_best_weights=True, verbose=1)
+
+lr_scheduler = tf.keras.callbacks.ReduceLROnPlateau(
+    monitor='val_loss',
+    factor=0.5,
+    patience=3,
+    min_lr=1e-6,
+    verbose=1
+)
+
+early_stop = tf.keras.callbacks.EarlyStopping(
+    monitor='val_loss',
+    patience=7,
+    restore_best_weights=True,
+    verbose=1
+)
 
 model.compile(
     optimizer=optimizer,
@@ -150,12 +161,19 @@ model.compile(
     metrics=['accuracy', tf.keras.metrics.Precision(), tf.keras.metrics.Recall(), tf.keras.metrics.AUC(name='auc')]
 )
 
-print("Training MobileNetV2 for Wildfire Detection...")
-print("Ideal for mobile deployment: drones, smartphones, edge devices\n")
-history = model.fit(train_gen, epochs=20, validation_data=val_gen, callbacks=[lr_scheduler, early_stop])
+# ===============================
+# 6. TRAIN MODEL
+# ===============================
+print("Training Custom CNN for Wildfire Detection...")
+history = model.fit(
+    train_gen,
+    epochs=20,
+    validation_data=val_gen,
+    callbacks=[lr_scheduler, early_stop]
+)
 
 # ===============================
-# 6. EVALUATION WITH ERROR ANALYSIS
+# 7. EVALUATION WITH ERROR ANALYSIS
 # ===============================
 print("\n" + "="*80)
 print(" TEST SET EVALUATION & ERROR ANALYSIS")
@@ -194,19 +212,19 @@ print(f"  Risk: {'🔴 HIGH' if fnr_rate > 10 else '🟡 MEDIUM' if fnr_rate > 5
 
 plt.figure(figsize=(8, 6))
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["No Fire", "Fire"])
-disp.plot(cmap='Oranges', values_format='d')
-plt.title("Confusion Matrix - MobileNetV2")
+disp.plot(cmap='Blues', values_format='d')
+plt.title("Confusion Matrix - Custom CNN")
 plt.tight_layout()
-plt.savefig("models/mobilenet_confusion_matrix.png", dpi=150, bbox_inches='tight')
+plt.savefig("models/cnn_confusion_matrix.png", dpi=150, bbox_inches='tight')
 plt.close()
 
 report = classification_report(y_true, y_pred, target_names=["No Fire", "Fire"], output_dict=True)
 df_report = pd.DataFrame(report).transpose()
 print(f"\nClassification Report:\n{df_report.round(3)}")
-df_report.to_csv("results/mobilenet_classification_report.csv")
+df_report.to_csv("results/cnn_classification_report.csv")
 
 # ===============================
-# 7. ROC/AUC ANALYSIS
+# 8. ROC/AUC ANALYSIS
 # ===============================
 print("\n" + "="*80)
 print(" ROC/AUC & PRECISION-RECALL ANALYSIS")
@@ -247,11 +265,11 @@ axes[2].legend()
 axes[2].grid(alpha=0.3)
 
 plt.tight_layout()
-plt.savefig("models/mobilenet_roc_pr_threshold_analysis.png", dpi=150, bbox_inches='tight')
+plt.savefig("models/cnn_roc_pr_threshold_analysis.png", dpi=150, bbox_inches='tight')
 plt.close()
 
 # ===============================
-# 8. STRATEGY FOR REDUCING FALSE NEGATIVES
+# 9. STRATEGY FOR REDUCING FALSE NEGATIVES
 # ===============================
 print("\n" + "="*80)
 print(" STRATEGY FOR REDUCING FALSE NEGATIVES")
@@ -290,41 +308,36 @@ print(f"   Reduces FN to {best_thresh['fn']} ({best_thresh['fn_rate']:.2f}%)")
 print(f"   Recall: {best_thresh['recall']:.3f}, Precision: {best_thresh['precision']:.3f}")
 
 print("\n" + "="*80)
-print(" ACTIONABLE NEXT STEPS - MOBILE DEPLOYMENT")
+print(" ACTIONABLE NEXT STEPS")
 print("="*80)
 print("""
 1. THRESHOLD TUNING (Immediate):
-   • Lower threshold to 0.3-0.4 for mobile deployment
-   • Critical for real-time fire detection on drones/devices
-   • Adaptive thresholding based on environment
+   • Lower threshold to 0.3-0.4 to reduce missed fires
+   • Trade-off: More false alarms, fewer disasters
 
-2. MOBILE OPTIMIZATION (Short-term):
-   • Convert to TensorFlow Lite with INT8 quantization
-   • Model size: 3.4MB → <1MB (4x reduction)
-   • Inference speed: 3-4x faster on mobile CPUs
-   • GPU delegate for 2-5x mobile GPU speedup
-
-3. CLASS IMBALANCE (Short-term):
-   • Apply class weights: {0: 1.0, 1: 2.5}
+2. CLASS IMBALANCE (Short-term):
+   • Apply class weights: {0: 1.0, 1: 2.0}
    • Use focal loss for hard examples
+
+3. ARCHITECTURE IMPROVEMENTS (Medium-term):
+   • Try pretrained models (EfficientNet, MobileNet, ResNet)
+   • Add attention mechanisms
+   • Deeper networks with residual connections
+
+4. DATA AUGMENTATION (Medium-term):
    • Oversample fire images
+   • Fire-specific augmentations (brightness, smoke effects)
+   • Collect diverse wildfire imagery
 
-4. EDGE DEPLOYMENT (Medium-term):
-   • Raspberry Pi 4 for stationary cameras
-   • Android/iOS apps with TFLite
-   • Drone integration with real-time streaming
-   • Low-power mode for battery devices
+5. ENSEMBLE METHODS (Medium-term):
+   • Combine CNN + EfficientNet + MobileNet
+   • Voting/averaging reduces model-specific errors
 
-5. TWO-STAGE DETECTION (Medium-term):
-   • Stage 1: Fast MobileNet screening (threshold 0.3)
-   • Stage 2: Confirmation with ensemble
-   • Alert levels: watch, warning, critical
-
-6. REAL-TIME ENHANCEMENTS (Long-term):
-   • Video stream processing (5-10 FPS)
-   • Temporal smoothing across frames
-   • Multi-scale detection for small fires
-   • GPS integration for location tagging
+6. DEPLOYMENT (Production):
+   • Use threshold 0.3-0.4
+   • Two-stage: sensitive screening + confirmation
+   • Human-in-the-loop for borderline predictions
+   • Real-time alerting with confidence scores
 
 7. MONITORING (Continuous):
    • Track FN rate in production
@@ -334,31 +347,11 @@ print("""
 """)
 
 # ===============================
-# 9. SAVE MODELS
+# 10. SAVE MODEL & TRAINING CURVES
 # ===============================
-model.save("models/mobilenet_v2_wildfire.h5")
+model.save("models/wildfire_cnn_best_model.h5")
+print("\n✅ Model saved to models/wildfire_cnn_best_model.h5")
 
-# TFLite conversion
-converter = tf.lite.TFLiteConverter.from_keras_model(model)
-tflite_model = converter.convert()
-with open("models/mobilenet_v2_wildfire.tflite", "wb") as f:
-    f.write(tflite_model)
-
-# Quantized TFLite
-converter_quantized = tf.lite.TFLiteConverter.from_keras_model(model)
-converter_quantized.optimizations = [tf.lite.Optimize.DEFAULT]
-tflite_quantized = converter_quantized.convert()
-with open("models/mobilenet_v2_wildfire_quantized.tflite", "wb") as f:
-    f.write(tflite_quantized)
-
-print("\n✅ Model saved:")
-print("  • .h5 format for server/desktop")
-print("  • .tflite format for mobile deployment")
-print("  • .tflite quantized for optimized inference")
-
-# ===============================
-# 10. TRAINING CURVES
-# ===============================
 fig, axes = plt.subplots(2, 3, figsize=(18, 10))
 
 axes[0,0].plot(history.history['accuracy'], label='train')
@@ -406,11 +399,11 @@ else:
     axes[1,2].axis('off')
 
 plt.tight_layout()
-plt.savefig("models/mobilenet_training_curves.png", dpi=150, bbox_inches='tight')
+plt.savefig("models/training_curves_best.png", dpi=150, bbox_inches='tight')
 plt.close()
 
 # ===============================
-# 11. SAMPLE PREDICTIONS WITH INFERENCE TIME
+# 11. SAMPLE PREDICTIONS
 # ===============================
 num_samples = 8
 indices = np.random.choice(len(test_gen.filepaths), num_samples, replace=False)
@@ -418,36 +411,26 @@ indices = np.random.choice(len(test_gen.filepaths), num_samples, replace=False)
 fig, axes = plt.subplots(2, 4, figsize=(16, 8))
 axes = axes.ravel()
 
-inference_times = []
-
 for i, idx in enumerate(indices):
     img_path = test_gen.filepaths[idx]
-    img = image.load_img(img_path, target_size=IMG_SIZE)
+    img = image.load_img(img_path, target_size=best_size)
     img_array = image.img_to_array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     
-    start_time = time.time()
     prediction = model.predict(img_array, verbose=0)[0][0]
-    inference_time = (time.time() - start_time) * 1000
-    inference_times.append(inference_time)
-    
     true_label = "Fire" if test_gen.classes[idx] == 1 else "No Fire"
     pred_label = "Fire" if prediction > 0.5 else "No Fire"
     pred_optimized = "Fire" if prediction > best_thresh['threshold'] else "No Fire"
     
     axes[i].imshow(img)
     color = 'green' if pred_label == true_label else 'red'
-    axes[i].set_title(f"True: {true_label}\nPred(0.5): {pred_label}\nPred({best_thresh['threshold']:.2f}): {pred_optimized}\nConf: {prediction:.3f} | {inference_time:.1f}ms", 
-                      color=color, fontsize=8)
+    axes[i].set_title(f"True: {true_label}\nPred(0.5): {pred_label}\nPred({best_thresh['threshold']:.2f}): {pred_optimized}\nConf: {prediction:.3f}", 
+                      color=color, fontsize=9)
     axes[i].axis('off')
 
 plt.tight_layout()
-plt.savefig("models/mobilenet_sample_predictions.png", dpi=150, bbox_inches='tight')
+plt.savefig("models/cnn_sample_predictions.png", dpi=150, bbox_inches='tight')
 plt.close()
-
-avg_inference_time = np.mean(inference_times)
-print(f"\nAverage inference time: {avg_inference_time:.2f}ms")
-print(f"Estimated FPS: {1000/avg_inference_time:.1f}")
 
 # ===============================
 # SUMMARY
@@ -462,10 +445,8 @@ print(f" Test AUC:       {roc_auc:.4f}")
 print(f" False Negatives: {fn} ({fnr_rate:.2f}%)")
 print(f" Recommended Threshold: {best_thresh['threshold']:.2f}")
 print(f" Total Parameters: {model.count_params():,}")
-print(f" Avg Inference Time: {avg_inference_time:.2f}ms")
-print(f"\n MOBILE DEPLOYMENT READY:")
-print(f" ✓ Fast inference: ~{avg_inference_time:.0f}ms")
-print(f" ✓ Small model: <5MB")
-print(f" ✓ TFLite format available")
-print(f" ✓ Quantized version for optimization")
+print(f" Best image size: {best_size}")
+print(f" Best augmentation: {best_aug}")
+print(f" Batch size: {BATCH_SIZE}")
+print(f" Learning rate: 0.001")
 print("="*80)
