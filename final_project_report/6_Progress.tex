@@ -1,9 +1,21 @@
-Lorem ipsum dolor sit amet, consectetur adipiscing
-elit, sed do eiusmod tempor incididunt ut labore et
-dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut
-aliquip ex ea commodo consequat. Duis aute irure
-dolor in reprehenderit in voluptate velit esse cil-
-lum dolore eu fugiat nulla pariatur. Excepteur sint
-occaecat cupidatat non proident, sunt in culpa qui
-officia deserunt mollit anim id est laborum. [1]
+% The original plan was to find and address any improvements on the current model made thus far. 
+% There were 3 key improvements considered looking into during the process; efficiency, accuracy, and mobility. 
+% Accuracy is the most clear option to improve upon. Increasing the correct guesses on when a wildfire takes place is cruical for this project. 
+% Efficiency allows for less resources and decrease downtime to identify whether a wildfire has started. Mobility is chosen to answer the question on whether this model can be operable in a more portable
+% manner, such that detecting wildfires doesn't rely on extremely expensive hard. In order to proceed with the plan, 3 different models(Resnet18, EfficientNet, Mobilenet)
+% were looked inplemented with the same dataset to see how improving certain aspects that the models excel would affect the overall performance. Feedback from the previous progress report 
+% suggested additions such as allowing the code base to track mores that could help differentiate the pros and cons between each models including
+% ROC/AUC. The current plan differs from the original in that the models needed more error analysis in order to decrease the rate of false negatives.   
+
+The original plan was to evaluate the current wildfire detection model and identify areas for improvement. 
+We initially focused on three key aspects: efficiency, accuracy, and mobility. 
+Accuracy was the most straightforward area to target, since increasing correct predictions—especially reducing false negatives—is critical for wildfire detection. 
+Efficiency mattered because a faster model reduces resource usage and shortens the time needed to confirm whether a wildfire has begun. 
+Mobility was also important, as we wanted to explore whether the model could eventually be deployed on more portable and cost-effective hardware rather than relying on expensive systems.
+
+To follow through on this plan, we implemented and compared three different models—ResNet18, EfficientNet, and MobileNet—using the same dataset. 
+Each model was chosen because it excels in one of the improvement categories. Based on feedback from my previous progress report, 
+We also incorporated additional evaluation metrics, such as ROC/AUC, to better capture the strengths and weaknesses of each approach.
+
+However, the plan shifted slightly during the process. After running the models, it became clear that more detailed error analysis was needed, especially to address the high rate of false negatives. 
+Because of this, the direction of the project moved from general improvement across multiple categories to a more targeted focus on understanding and reducing misclassifications.
